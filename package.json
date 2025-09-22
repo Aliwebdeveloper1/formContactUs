@@ -1,0 +1,13 @@
+{
+  "name": "contact-form-app",
+  "version": "1.0.0",
+  "description": "A beautiful React contact form application that saves form submissions locally in the browser's localStorage",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm start",
+    "install": "cd frontend && npm install"
+  },
+  "keywords": ["react", "contact-form", "localStorage", "frontend"],
+  "author": "Aliwebdeveloper1",
+  "license": "MIT"
+}
