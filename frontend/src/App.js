@@ -137,34 +137,43 @@ function App() {
     setMessage({ text: '', type: '' });
 
     try {
-      // Send form data to MongoDB backend API
-      const response = await fetch(getApiUrl('/api/contact'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        setMessage({ text: 'Thank you! Your message has been saved successfully.', type: 'success' });
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: ''
+      const apiUrl = getApiUrl('/api/contact');
+      
+      // Check if API is available
+      if (apiUrl) {
+        // Try to send to backend API
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
         });
-        generateCaptcha();
-        
-        console.log(`Form submitted successfully to MongoDB! Contact ID: ${result.data.id}`);
-        
-        // Also save backup to localStorage for offline capability
-        saveLeadToStorage(formData);
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          setMessage({ text: 'Thank you! Your message has been saved successfully to our database.', type: 'success' });
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            subject: '',
+            message: ''
+          });
+          generateCaptcha();
+          
+          console.log(`Form submitted successfully to MongoDB! Contact ID: ${result.data.id}`);
+          
+          // Also save backup to localStorage
+          saveLeadToStorage(formData);
+          return; // Exit early on success
+        } else {
+          throw new Error(result.message || 'Failed to save to database');
+        }
       } else {
-        throw new Error(result.message || 'Failed to save to database');
+        // No API available, save to localStorage only
+        throw new Error('API not available, using local storage');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
