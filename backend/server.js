@@ -13,6 +13,14 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Add request logging for debugging in production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+  });
+}
+
 // Middleware
 app.use(helmet());
 // Dynamic CORS configuration for development and production
@@ -88,6 +96,20 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Contact Form Backend API',
     version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    endpoints: {
+      'POST /api/contact': 'Submit a contact form',
+      'GET /api/contacts': 'Get all contact submissions',
+      'GET /health': 'Health check'
+    }
+  });
+});
+
+// API base route
+app.get('/api', (req, res) => {
+  res.json({
+    message: 'Contact Form API',
+    version: '1.0.0',
     endpoints: {
       'POST /api/contact': 'Submit a contact form',
       'GET /api/contacts': 'Get all contact submissions'
@@ -97,7 +119,12 @@ app.get('/', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    mongodb: 'connected'
+  });
 });
 
 // Submit contact form

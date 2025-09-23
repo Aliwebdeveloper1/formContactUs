@@ -4,7 +4,7 @@ const config = {
     apiUrl: 'http://localhost:5000',
   },
   production: {
-    apiUrl: process.env.REACT_APP_API_URL || '/api', // Use relative path for same domain or env variable
+    apiUrl: process.env.REACT_APP_API_URL || '', // Use relative path for same domain or env variable
   }
 };
 
