@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from './config';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -136,10 +137,18 @@ function App() {
     setMessage({ text: '', type: '' });
 
     try {
-      // Save form data to localStorage
-      const success = saveLeadToStorage(formData);
+      // Send form data to MongoDB backend API
+      const response = await fetch(getApiUrl('/api/contact'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
 
-      if (success) {
+      const result = await response.json();
+
+      if (response.ok && result.success) {
         setMessage({ text: 'Thank you! Your message has been saved successfully.', type: 'success' });
         setFormData({
           name: '',
@@ -150,18 +159,37 @@ function App() {
         });
         generateCaptcha();
         
-        // Optional: Log current leads count
-        const leads = getLeadsFromStorage();
-        console.log(`Form submitted successfully! Total leads saved: ${leads.length}`);
+        console.log(`Form submitted successfully to MongoDB! Contact ID: ${result.data.id}`);
+        
+        // Also save backup to localStorage for offline capability
+        saveLeadToStorage(formData);
       } else {
-        throw new Error('Failed to save to localStorage');
+        throw new Error(result.message || 'Failed to save to database');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      setMessage({ 
-        text: 'Sorry, there was an error saving your message. Please try again.', 
-        type: 'error' 
-      });
+      
+      // Fallback to localStorage if API fails
+      const localSuccess = saveLeadToStorage(formData);
+      if (localSuccess) {
+        setMessage({ 
+          text: 'Your message has been saved locally. We will sync it when the connection is restored.', 
+          type: 'success' 
+        });
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+        generateCaptcha();
+      } else {
+        setMessage({ 
+          text: 'Sorry, there was an error saving your message. Please try again.', 
+          type: 'error' 
+        });
+      }
     } finally {
       setLoading(false);
     }

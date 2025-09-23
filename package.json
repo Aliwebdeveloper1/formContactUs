@@ -5,9 +5,25 @@
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
     "start": "cd frontend && npm start",
-    "install": "cd frontend && npm install"
+    "install": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build:backend": "cd backend && npm install",
+    "build:frontend": "cd frontend && npm install && npm run build"
   },
-  "keywords": ["react", "contact-form", "localStorage", "frontend"],
+  "keywords": [
+    "react",
+    "contact-form",
+    "localStorage",
+    "frontend"
+  ],
   "author": "Aliwebdeveloper1",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.2.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
 }
